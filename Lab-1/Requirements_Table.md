@@ -1,0 +1,21 @@
+# Requirements Table — Inter-City Freight Load Matching Marketplace
+
+**Problem Statement #28 | Smart Cities, Transport & Logistics**
+**Actors:** Shipper, Freight Carrier
+
+## Functional Requirements
+
+| ID | Type | Description | Priority | Acceptance Criteria | Rationale |
+|----|------|-------------|----------|---------------------|-----------|
+| FR-001 | Functional | The system shall allow verified trucking carriers to submit competitive bids on posted freight shipments within a specified auction timeframe. | High | Pass: Carrier bid recorded and shipper notified. Fail: Unverified carrier submits bid without valid permits. | This is the core matching mechanism of the marketplace; without verified bidding, shippers cannot trust carrier legitimacy. |
+| FR-002 | Functional | The system shall allow authenticated shippers to post a new freight load listing with details including origin, destination, cargo type, weight, pickup window, and reserve price. | High | Pass: Load appears in the open marketplace and is visible to eligible carriers within 5 seconds of posting. Fail: Load is published with missing mandatory fields (e.g. no destination or weight). | A complete, structured listing is what carriers bid against; incomplete listings lead to mismatched or invalid bids downstream. |
+| FR-003 | Functional | The system shall allow the shipper to review all submitted bids for a load and award the contract to a single carrier, automatically closing the bid window and notifying losing bidders. | High | Pass: Selected carrier is awarded, all other carriers receive a rejection notification, and load status updates to "Awarded." Fail: Shipper attempts to award the same load to more than one carrier. | Ensures a single, unambiguous contractual commitment per load and prevents double-booking of freight capacity. |
+| FR-004 | Functional | The system shall allow the assigned carrier to upload electronic proof-of-delivery (e-signature, photo, or scanned receipt) upon completion of the shipment. | High | Pass: Proof is timestamped, linked to the correct load ID, and shipper is notified for sign-off. Fail: Carrier attempts to submit proof-of-delivery for a load not assigned to them. | Proof-of-delivery is the trigger event for milestone payment release, so it must be verifiably tied to the correct shipment and carrier. |
+| FR-005 | Functional | The system shall provide both shipper and carrier with real-time visibility into the current status of a load (Posted → Bidding → Awarded → In-Transit → Delivered → Paid). | Medium | Pass: Status updates automatically as each milestone event occurs and is visible to both parties. Fail: Status remains unchanged after a milestone event (e.g. proof-of-delivery uploaded but status still shows "In-Transit"). | Transparency into shipment lifecycle reduces disputes and support overhead between shippers and carriers. |
+
+## Non-Functional Requirements
+
+| ID | Type | Description | Priority | Acceptance Criteria | Rationale |
+|----|------|-------------|----------|---------------------|-----------|
+| NFR-001 | Performance & Security | Milestone payments held in escrow shall disburse automatically within 60 seconds of verified electronic proof-of-delivery submission. | High | Pass: Benchmarking tests confirm target latency and security standards under simulated peak load. Fail: Payment disbursement exceeds 60 seconds or occurs without valid proof-of-delivery verification. | Fast, secure payment release builds carrier trust in the platform and reduces cash-flow risk for small trucking operators. |
+| NFR-002 | Scalability | The system shall support at least 500 concurrent active bidding sessions across different freight loads without degradation in bid submission response time (< 2 seconds). | Medium | Pass: Load testing confirms bid submission response time stays under 2 seconds at 500 concurrent sessions. Fail: Response time exceeds 2 seconds or bids are dropped under peak concurrent load. | Freight marketplaces experience bursty demand (e.g. end-of-quarter shipping surges); the system must remain responsive under peak usage to avoid lost business. |
