@@ -1,0 +1,19 @@
+# Static Code Analysis Issues Table
+
+Below is the documentation of issues identified by **Bandit**, **Flake8**, and **Pylint** in `expense_tracker.py`, sorted with high and medium severity security findings first, followed by code quality and style issues.
+
+| Issue | Type | Line(s) | Description | Fix Approach |
+|---|---|---|---|---|
+| **B605: Shell Process Execution** | Security (High) | 61 | `os.system("xdg-open " + path)` spawns a system shell with concatenated strings, exposing CWE-78 command injection risk. | Replaced with standard desktop viewer `webbrowser.open(path)` which executes without a shell and prevents command injection. |
+| **B306: Insecure Deprecated Function** | Security (Medium) | 55 | `tempfile.mktemp(suffix=".txt", dir=REPORT_DIR)` is deprecated and vulnerable to CWE-377 symlink and TOCTOU race conditions. | Replaced with `tempfile.mkstemp(suffix=".txt", dir=REPORT_DIR)` which securely and atomically creates and opens the file. |
+| **B108: Hardcoded Temp Directory** | Security (Medium) | 8 | `REPORT_DIR = "/tmp/expense_reports"` uses a predictable hardcoded temporary directory path vulnerable to symlink attacks on shared systems and breaks on Windows. | Replaced with `os.path.join(tempfile.gettempdir(), "expense_reports")` for secure and cross-platform temp directory resolution. |
+| **B105: Hardcoded Password** | Security (Low) | 5 | `BANK_SYNC_PASSWORD = "demo-sync-pass"` hardcodes credentials directly into source code (CWE-259). | Retrieved credentials securely from environment variable `os.environ.get("BANK_SYNC_PASSWORD", "demo-sync-pass")`. |
+| **W0718: Broad Exception Caught** | Bug / Quality (Medium) | 41 | `except Exception:` in `biggestExpense()` suppresses all unexpected exceptions indiscriminately, obscuring runtime errors. | Replaced with specific `except ValueError:` because `max()` on an empty iterable raises `ValueError`. |
+| **W0603 & C0103: Global Statement & Mutable Global State** | Code Quality | 7, 29-30 | `global monthly_budget` mutates global state across functions, creating side effects and violating clean architecture. | Encapsulated state and methods cleanly inside the `ExpenseTracker` class. |
+| **C0200: Range Len Iteration** | Code Quality | 45 | Iterating using `range(len(expenses))` is a Python anti-pattern compared to `enumerate()`. | Replaced with idiomatic `for i, expense in enumerate(self.expenses, start=1):`. |
+| **C0103: Non-PEP 8 Naming Conventions** | Style | 11, 20, 28, 33, 38, 44, 49, 53, 55, 59 | Functions, variables, and arguments used camelCase (e.g. `addExpense`, `totalByCategory`, `newBudget`, `reportPath`). | Converted all function, argument, and variable names to PEP 8 standard `snake_case`. |
+| **C0114 & C0116: Missing Docstrings** | Documentation | 1, 11, 20, 28, 33, 38, 44, 49, 53, 59, 64 | Module, class, and functions lacked descriptive docstrings explaining their parameters and purpose. | Added comprehensive PEP 257 docstrings for the module, class, methods, and functions. |
+| **E203: Whitespace Before Colon** | Style / PEP 8 | 15 | Whitespace before colon in dictionary literal (`{"amount" : amount}`). | Removed extraneous space before colon: `{"amount": amount}`. |
+| **E302: Blank Line Spacing** | Style / PEP 8 | 44 | Expected 2 blank lines before top-level function definition, found 1. | Added standard 2 blank lines before function definition. |
+| **E261: Inline Comment Spacing** | Style / PEP 8 | 74 | Only 1 space provided before inline comment (`remainingBudget()) # after setBudget`). | Enforced PEP 8 standard of at least 2 spaces before inline comment. |
+| **E501: Line Length Exceeded** | Style / PEP 8 | 77 | Print statement exceeded maximum line length (93 characters vs. 79 character PEP 8 limit). | Split statement across multiple lines cleanly within 79 characters. |
